@@ -1,31 +1,57 @@
-class lexer:
-    def __init__(self,source):
-        self.source=source + '\n'
-        self.curChar=''
-        self.curPos=-1
-        self.nextChar()
+class Lexer:
+    def __init__(self, source):
+        self.source_code = source.code
+        self.position = 0
+        self.line = 1
+        self.operators = {"+", "-", "*", "/", "="}
 
-    def nextChar(self):
-        self.curPos+=1
-        if self.curPos<len(self.source):
-            self.curChar=self.source[self.curPos]
-        else:
-            self.curChar='\0'
+        self.tokens =  []
 
+    
+    
     def peek(self):
-        if self.curPos + 1 >= len(self.source):
-            return '\0'
-        return self.source[self.curPos+1]
+        if self.position < len(self.source_code):
+            return self.source_code[self.position]
+        return None
 
-    def skipCow(self):
-        while self.curChar in ('\t',' '):
-            self.nextChar()
+    def advance(self):
+        if self.position < len(self.source_code):
+            char = self.source_code[self.position]
+            self.position +=1
+            if char == "\n":
+                self.line += 1
+            return char
+        return None
 
-        if self.curChar=='\\' and self.peek() == '\\':
-            while self.curChar!='\n':
-                self.nextChar()
+    def consume_identifier(self):
+        
+        start_pos = self.position
+        while self.peek() is not None and (self.peek().isalnum() or self.peek() == '_'):
+            self.advance()
+        value = self.source_code[start_pos:self.position]
+        if value in {'int', 'if', 'else', 'return', 'while', 'for', 'true', 'false'}:  
+            return ('KEYWORD', value, self.line)
+        return ('IDENTIFIER', value, self.line)
 
-    def getToken(self):
-        pass
+    def consume_number(self):
+        
+        start_pos = self.position
+        while self.peek() is not None and self.peek().isdigit():
+            self.advance()
+        return ('NUMBER', self.source_code[start_pos:self.position], self.line)
 
-class Token    
+    def tokenise(self):
+        while self.peek() is not None:
+            char = self.peek()
+
+            if char.isspace():
+                self.advance()
+            elif char.isalpha():
+                self.tokens.append(self.consume_identifier())
+            elif char.isdigit():
+                self.tokens.append(self.consume_number())
+            elif char in self.operators:
+                self.tokens.append(("OPERATOR", char))
+        return self.tokens
+
+
