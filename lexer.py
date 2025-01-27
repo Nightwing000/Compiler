@@ -12,7 +12,7 @@ class Lexer:
     def peek(self):
         if self.position < len(self.source_code):
             return self.source_code[self.position]
-        return None
+        return '\0'
 
     def advance(self):
         if self.position < len(self.source_code):
@@ -26,7 +26,7 @@ class Lexer:
     def consume_identifier(self):
         
         start_pos = self.position
-        while self.peek() is not None and (self.peek().isalnum() or self.peek() == '_'):
+        while self.peek() is not '\0' and (self.peek().isalnum() or self.peek() == '_'):
             self.advance()
         value = self.source_code[start_pos:self.position]
         if value in {'int', 'if', 'else', 'return', 'while', 'for', 'true', 'false'}:  
