@@ -21,16 +21,18 @@ class Lexer:
             if char == "\n":
                 self.line += 1
             return char
+
         return None
     def consume_comment(self):
         if self.peek() == '/':  
             while self.peek() is not None and self.peek() != '\n':
                 self.advance()
+       
 
     def consume_identifier(self):
         
         start_pos = self.position
-        while self.peek() is not None and (self.peek().isalnum() or self.peek() == '_'):
+        while self.peek() is not '\0' and (self.peek().isalnum() or self.peek() == '_'):
             self.advance()
         value = self.source_code[start_pos:self.position]
         if value in {'int', 'if', 'else', 'return', 'while', 'for', 'true', 'false'}:  
@@ -50,12 +52,12 @@ class Lexer:
     def consume_number(self):
         
         start_pos = self.position
-        while self.peek() is not None and self.peek().isdigit():
+        while self.peek() is not '\0' and self.peek().isdigit():
             self.advance()
         return ('NUMBER', self.source_code[start_pos:self.position], self.line)
 
     def tokenise(self):
-        while self.peek() is not None:
+        while self.peek() is not '\0':
             char = self.peek()
 
             if char.isspace():
