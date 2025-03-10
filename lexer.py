@@ -3,8 +3,8 @@ class Lexer:
         self.source_code = source.code
         self.position = 0
         self.line = 1
-        self.operators = {"+", "-", "*", "/", "="}
-
+        self.operators = {"+", "-", "*", "/", "=","==","!=", "<=", ">=", "+=", "-=", "*=","/=","&&","||"}
+        self.single_char_tokens = {'(',')','{','}',';',','}
         self.tokens =  []
 
     
@@ -12,7 +12,7 @@ class Lexer:
     def peek(self):
         if self.position < len(self.source_code):
             return self.source_code[self.position]
-        return '\0'
+        return None
 
     def advance(self):
         if self.position < len(self.source_code):
@@ -21,7 +21,13 @@ class Lexer:
             if char == "\n":
                 self.line += 1
             return char
-        return '\0'
+
+        return None
+    def consume_comment(self):
+        if self.peek() == '/':  
+            while self.peek() is not None and self.peek() != '\n':
+                self.advance()
+       
 
     def consume_identifier(self):
         
@@ -32,6 +38,16 @@ class Lexer:
         if value in {'int', 'if', 'else', 'return', 'while', 'for', 'true', 'false'}:  
             return ('KEYWORD', value, self.line)
         return ('IDENTIFIER', value, self.line)
+    
+    def consume_operator(self):
+        start_pos = self.position
+        char = self.advance()
+
+        next_char = self.peek()
+        if next_char and (char+ next_char) in self.operators:
+            self.advance()
+            return("OPERATOR", char+ next_char, self.line)
+        return ("OPERATOR", char, self.line)
 
     def consume_number(self):
         
@@ -51,7 +67,9 @@ class Lexer:
             elif char.isdigit():
                 self.tokens.append(self.consume_number())
             elif char in self.operators:
-                self.tokens.append(("OPERATOR", char))
+                self.tokens.append(self.consume_operator())
+            elif char in self.single_char_tokens:
+                self.tokens.append((char,char,self.line))
+                self.advance()
         return self.tokens
-
 
